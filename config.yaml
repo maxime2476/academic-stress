@@ -1,0 +1,79 @@
+data:
+  # Relative path from project root (academic_stress_index_predict/)
+  path: "data/academic_stress_level.csv"
+  encoding: "utf-8"
+  timestamp_column: "Timestamp"
+  target_column: "Rate your academic stress index"
+
+columns:
+  # Ordinal features: Likert scale 1-5
+  ordinal:
+    - "Peer pressure"
+    - "Academic pressure from your home"
+    - "What would you rate the academic  competition in your student life"
+
+  # Nominal (unordered categorical) features
+  nominal:
+    - "Your Academic Stage"
+    - "Study Environment"
+    - "What coping strategy you use as a student?"
+    - "Do you have any bad habits like smoking or drinking on a daily basis?"
+
+  # Human-readable aliases for long column names (used in plots / reports)
+  aliases:
+    "Peer pressure": "peer_pressure"
+    "Academic pressure from your home": "family_pressure"
+    "What would you rate the academic  competition in your student life": "academic_competition"
+    "Your Academic Stage": "academic_stage"
+    "Study Environment": "study_environment"
+    "What coping strategy you use as a student?": "coping_strategy"
+    "Do you have any bad habits like smoking or drinking on a daily basis?": "bad_habits"
+    "Rate your academic stress index": "stress_index"
+
+preprocessing:
+  # Ordinal Likert grouping strategy
+  # Rationale: merge extremes to reduce sparsity; 1-2=low, 3=medium, 4-5=high
+  bin_edges: [0, 2, 3, 5]      # pandas cut edges (right-inclusive)
+  bin_labels: ["1-2", "3", "4-5"]
+  # Reference categories dropped by OneHotEncoder (drop='first' strategy)
+  # to avoid perfect multicollinearity in the design matrix
+
+target:
+  # Binarisation threshold: HighStress = 1 if raw score >= high_stress_cutoff
+  high_stress_cutoff: 4
+  positive_label: 1    # high stress
+  negative_label: 0    # not high stress
+
+modeling:
+  test_size: 0.35
+  random_state: 42
+  cv_folds: 5
+  bootstrap_samples: 500
+  bootstrap_random_state: 0
+
+  logistic_regression:
+    solver: "liblinear"
+    penalty: "l2"
+    C: 1.0
+    class_weight: "balanced"
+    max_iter: 5000
+    random_state: 42
+
+thresholds:
+  # Cost-sensitive threshold: weight FN errors more heavily than FP
+  # FN weight = 3 → missing a high-stress student is 3x costlier than a false alarm
+  fn_cost: 3
+  fp_cost: 1
+  # Operational threshold retained for deployment (see threshold_analysis report)
+  operational: 0.465
+
+outputs:
+  results_dir:  "outputs/results"
+  figures_dir:  "outputs/figures"
+  models_dir:   "outputs/models"
+  logs_dir:     "logs"
+
+econometrics:
+  hosmer_lemeshow_groups: 10
+  vif_threshold: 5.0           # VIF > 5 → moderate multicollinearity concern
+  significance_level: 0.05

@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+pip-wheel-metadata/
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Outputs (generated artifacts, not source-controlled)
+outputs/figures/*
+outputs/results/*
+outputs/models/*
+logs/*
+
+# Keep directory structure
+!outputs/figures/.gitkeep
+!outputs/results/.gitkeep
+!outputs/models/.gitkeep
+!logs/.gitkeep
+
+# Legacy Excel exports (replaced by JSON/CSV outputs)
+*.xls
+*.xlsx
+
+# Secrets / environment
+.env.local
+*.pem
+*.key
+
+# Coverage
+.coverage
+htmlcov/
+.pytest_cache/
