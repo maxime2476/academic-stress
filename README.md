@@ -3,6 +3,14 @@
 > Identification des étudiants à haut risque de stress académique par régression logistique,  
 > avec une batterie complète de tests économétriques et statistiques.
 
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-1.3+-F7931E?logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
+[![pandas](https://img.shields.io/badge/pandas-2.0+-150458?logo=pandas&logoColor=white)](https://pandas.pydata.org/)
+[![pytest](https://img.shields.io/badge/tests-pytest-0A9EDC?logo=pytest&logoColor=white)](https://pytest.org/)
+[![Dataset](https://img.shields.io/badge/Dataset-Kaggle-20BEFF?logo=kaggle&logoColor=white)](https://www.kaggle.com/datasets/poushal02/student-academic-stress-real-world-dataset)
+[![AUC-ROC](https://img.shields.io/badge/AUC--ROC-0.747-brightgreen)](https://github.com/maxime2476/academic_stress_index_predict)
+[![PR-AUC](https://img.shields.io/badge/PR--AUC-0.857-blue)](https://github.com/maxime2476/academic_stress_index_predict)
+
 ---
 
 ## Contexte
