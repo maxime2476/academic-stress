@@ -252,19 +252,67 @@ La batterie de 13 tests (`scripts/run_econometrics.py`) couvre :
 
 ### Principe de séparation des responsabilités
 
-```
-config.yaml           ← paramètres (un seul fichier à modifier)
-    ↓
-src/config.py         ← lecture centralisée (singleton)
-    ↓
-src/data_loader.py    ← ingestion + validation des données brutes
-    ↓
-src/preprocessing.py  ← transformations (LikertBinner + encodeurs)
-    ↓
-src/modeling.py       ← entraînement + CV + seuils + bootstrap
-    ↓
-src/evaluation.py     ← métriques + figures + exports
-src/econometrics.py   ← batterie de tests statistiques
+```mermaid
+flowchart TD
+    %% Définition des styles
+    classDef config fill:#f8f9fa,stroke:#ced4da,stroke-width:2px,color:#495057
+    classDef data fill:#e7f5ff,stroke:#339af0,stroke-width:2px,color:#0b7285
+    classDef process fill:#fff3bf,stroke:#fcc419,stroke-width:2px,color:#d9480f
+    classDef model fill:#f3f0ff,stroke:#845ef7,stroke-width:2px,color:#5f3dc4
+    classDef eval fill:#ebfbee,stroke:#51cf66,stroke-width:2px,color:#2b8a3e
+    classDef artifact fill:#ffe8cc,stroke:#fd7e14,stroke-width:2px,color:#d9480f
+
+    C[("⚙️ config.yaml\n(Paramètres)")]:::config
+    D[("📄 academic_stress_level.csv\n(Données brutes)")]:::data
+
+    subgraph "1. Ingestion & Prétraitement"
+        DL["<b>data_loader.py</b><br/>Validation & Nettoyage (n=139)"]:::process
+        SPLIT{"Split Stratifié<br/>(Train 65% / Test 35%)"}:::process
+        PREP["<b>preprocessing.py</b><br/>LikertBinner & Encodage<br/>(Ajusté sur Train uniquement)"]:::process
+    end
+
+    subgraph "2. Apprentissage & Validation"
+        CV["<b>Validation Croisée</b><br/>5-Fold Stratifié sur Train<br/>(Hyperparamètres)"]:::model
+        MOD["<b>modeling.py</b><br/>Régression Logistique (L2)<br/>Entraînement sur tout le Train"]:::model
+    end
+
+    subgraph "3. Évaluation & Économétrie"
+        EVAL["<b>evaluation.py</b><br/>Métriques, Seuils d'alerte,<br/>Matrices & Courbes"]:::eval
+        ECON["<b>econometrics.py</b><br/>13 Tests (VIF, χ²...), IC Bootstrap,<br/>Effets Marginaux (AME)"]:::eval
+    end
+
+    subgraph "4. Artefacts Générés (Outputs)"
+        OUT_MOD[("💾 Modèles\n(pipeline.joblib)")]:::artifact
+        OUT_RES[("📊 Résultats\n(.json, prédictions .csv)")]:::artifact
+        OUT_FIG[("📈 Figures\n(ROC, OR, VIF .png)")]:::artifact
+    end
+
+    %% Flux d'Ingestion
+    C -->|Charge configs| DL
+    D --> DL
+    DL --> SPLIT
+    
+    %% Flux de Prétraitement (Contrôle du Leakage)
+    SPLIT ==>|X_train, y_train| PREP
+    SPLIT -.->|X_test, y_test| PREP
+    
+    %% Flux d'Apprentissage
+    PREP ==>|Train transformé| CV
+    CV ==> MOD
+    
+    %% Flux d'Évaluation (Parallèle)
+    MOD ==> EVAL
+    PREP -.->|Test transformé| EVAL
+    
+    MOD ==> ECON
+    PREP -.->|Test transformé| ECON
+
+    %% Flux de Génération des Artefacts
+    MOD ===> OUT_MOD
+    EVAL ===> OUT_RES
+    EVAL ===> OUT_FIG
+    ECON ===> OUT_RES
+    ECON ===> OUT_FIG
 ```
 
 Chaque module est **indépendamment testable** via les fixtures synthétiques de `tests/conftest.py`.
